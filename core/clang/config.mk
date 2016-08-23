@@ -20,10 +20,45 @@ LLVM_TBLGEN := $(BUILD_OUT_EXECUTABLES)/llvm-tblgen$(BUILD_EXECUTABLE_SUFFIX)
 
 # Clang flags for all host or target rules
 CLANG_CONFIG_EXTRA_ASFLAGS :=
+ifeq ($(CLANG_O3),true)
+CLANG_CONFIG_EXTRA_CFLAGS := -O3 -Qunused-arguments -Wno-unknown-warning-option
+CLANG_CONFIG_EXTRA_CONLYFLAGS := -std=gnu99
+CLANG_CONFIG_EXTRA_CPPFLAGS := -O3 -Qunused-arguments -Wno-unknown-warning-option -D__compiler_offsetof=__builtin_offsetof
+CLANG_CONFIG_EXTRA_LDFLAGS := -Wl,--sort-common
+else
 CLANG_CONFIG_EXTRA_CFLAGS :=
 CLANG_CONFIG_EXTRA_CONLYFLAGS := -std=gnu99
 CLANG_CONFIG_EXTRA_CPPFLAGS :=
 CLANG_CONFIG_EXTRA_LDFLAGS :=
+endif
+
+# Poly
+POLLYCC := \
+      -mllvm -polly \
+      -mllvm -polly-allow-nonaffine=1\
+      -mllvm -polly-ignore-aliasing=1 \
+      -mllvm -polly-ast-detect-parallel \
+      -mllvm -polly-disable-multiplicative-reductions
+
+ifeq ($(POLLY_OPTIMIZATION),true)
+DISABLE_POLLY := \
+   v8_tools_gyp_v8_base_arm_host_gyp%
+
+ ifeq ($(LOCAL_CLANG),true)
+  ifneq (1,$(words $(filter $(DISABLE_POLLY),$(LOCAL_MODULE))))
+   ifdef LOCAL_CFLAGS
+     LOCAL_CFLAGS += $(POLLYCC)
+   else
+     LOCAL_CFLAGS := $(POLLYCC)
+   endif
+   ifdef LOCAL_CPPFLAGS
+     LOCAL_CPPFLAGS += $(POLLYCC)
+   else
+     LOCAL_CPPFLAGS := $(POLLYCC)
+   endif
+  endif
+ endif
+endif
 
 CLANG_CONFIG_EXTRA_CFLAGS += \
   -D__compiler_offsetof=__builtin_offsetof
