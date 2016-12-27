@@ -1,5 +1,6 @@
 #!/usr/bin/env python
 # Copyright (C) 2012-2013, The CyanogenMod Project
+#           (C) 2017,      The LineageOS Project
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -181,7 +182,6 @@ def add_to_manifest(repositories, fallback_branch = None):
         print('Adding dependency: OneRomOne/%s -> %s' % (repo_name, repo_target))
         project = ElementTree.Element("project", attrib = { "path": repo_target,
             "remote": "github", "name": "OneRomOne/%s" % repo_name })
-
         if 'branch' in repository:
             project.set('revision',repository['branch'])
         elif fallback_branch:
